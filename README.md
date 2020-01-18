@@ -8,7 +8,7 @@ The `vtmm` package supports some of the same functionality as the [tmm](https://
 
 ## Gradients
 
-Currently vtmm is implementing using a Tensor Flow backend. This means that gradients of scalar loss / objective functions of the transmission and reflection can be taken for "free." At a later time I will implement a numpy backend for users that do not need this functionality.
+Currently `vtmm` is implementing using a Tensor Flow backend. This means that gradients of scalar loss / objective functions of the transmission and reflection can be taken for "free." At a later time I will implement a numpy backend for users that do not need this functionality.
 
 ## Example
 
