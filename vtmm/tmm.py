@@ -1,4 +1,4 @@
-import tensorflow as tf
+from .backend import backend as bd
 from .const import C0
 from .fresnel import _r, _t
 
@@ -23,53 +23,53 @@ def tmm_rt(pol, omega, kx, n, d):
     assert Nd > 0
     assert Nd == Nn - 2
 
-    n = tf.reshape(n, [-1, 1])
-    omega = tf.reshape(omega, [1, -1])
-    kx = tf.reshape(kx, [-1, 1, 1])
+    n = bd.reshape(n, [-1, 1])
+    omega = bd.reshape(omega, [1, -1])
+    kx = bd.reshape(kx, [-1, 1, 1])
 
     k = n * omega / C0
-    kz = tf.sqrt(tf.square(k) - tf.square(kx))
+    kz = bd.sqrt(bd.square(k) - bd.square(kx))
     kzn = kz/k # Use normalized kz as a surrogate for cos()
 
-    kzn = tf.reshape(tf.transpose(kzn, perm=[1, 0, 2]), [Nn, -1]) # [Nn, Nk*Nw]
-    kz = tf.reshape(tf.transpose(kz, perm=[1, 0, 2]), [Nn, -1]) # [Nn, Nk*Nw]
+    kzn = bd.reshape(bd.transpose(kzn, [1, 0, 2]), [Nn, -1]) # [Nn, Nk*Nw]
+    kz = bd.reshape(bd.transpose(kz, [1, 0, 2]), [Nn, -1]) # [Nn, Nk*Nw]
 
     # Broadcast
-    kz_d = kz[1:-1] * tf.reshape(d, [-1, 1])
+    kz_d = kz[1:-1] * bd.reshape(d, [-1, 1])
 
     # Flatten
-    kz_d = tf.reshape(kz_d, [-1])
+    kz_d = bd.reshape(kz_d, [-1])
 
     # Make diags
-    zz = tf.constant(0.0, dtype=d.dtype)
-    diag_d = tf.stack([tf.math.exp(tf.complex(zz, -kz_d)),
-                       tf.math.exp(tf.complex(zz,  kz_d))], axis=1)
+    zz = bd.constant(0.0, dtype=d.dtype)
+    diag_d = bd.stack([bd.exp(bd.complex(zz, -kz_d)),
+                       bd.exp(bd.complex(zz,  kz_d))], axis=1)
 
-    D = tf.linalg.diag(diag_d)
-    D = tf.reshape(D, [Nd, Nk*Nw, 2, 2])
+    D = bd.diag(diag_d)
+    D = bd.reshape(D, [Nd, Nk*Nw, 2, 2])
 
     # Helpers for constructing TMs
-    I = tf.linalg.eye(2, 2, batch_shape=(Nd, Nk*Nw), dtype=d.dtype)
-    Ir = tf.roll(I, 1, axis=2)
+    I = bd.eye(2, 2, batch_shape=(Nd, Nk*Nw), dtype=d.dtype)
+    Ir = bd.roll(I, 1, axis=2)
 
     # Fresnel coeffs
     rn = _r(pol, n[:-1], n[1:], kzn[:-1], kzn[1:])
     tn = _t(pol, n[:-1], n[1:], kzn[:-1], kzn[1:])
-    tn_1 = tf.reshape(tn[1:,:], [Nd, Nk*Nw, 1, 1])
-    rn_1 = tf.reshape(rn[1:,:], [Nd, Nk*Nw, 1, 1])
+    tn_1 = bd.reshape(tn[1:,:], [Nd, Nk*Nw, 1, 1])
+    rn_1 = bd.reshape(rn[1:,:], [Nd, Nk*Nw, 1, 1])
 
     # All layers and corresponding "trailing" interfaces
-    Mn = tf.matmul(D, tf.cast(1/ tn_1 * (I + Ir * rn_1), D.dtype))
+    Mn = bd.matmul(D, bd.cast(1/ tn_1 * (I + Ir * rn_1), D.dtype))
 
     # First interface
-    M0 = 1/tf.reshape(tn[0,:],[-1, 1, 1]) * (I[0,:] + Ir[0,:] * tf.reshape(rn[0,:], [-1, 1, 1]))
+    M0 = 1/bd.reshape(tn[0,:],[-1, 1, 1]) * (I[0,:] + Ir[0,:] * bd.reshape(rn[0,:], [-1, 1, 1]))
 
-    M = tf.cast(M0, D.dtype)
+    M = bd.cast(M0, D.dtype)
     #TODO(ian): see if this can be performed with einsum and if there is a performance benefit
     for i, Mi in enumerate(Mn):
-        M = tf.matmul(M, Mi)
+        M = bd.matmul(M, Mi)
 
-    t = tf.reshape(1 / M[:,0,0], [Nk, Nw])
-    r = tf.reshape(M[:,1,0] / M[:,0,0], [Nk, Nw])
+    t = bd.reshape(1 / M[:,0,0], [Nk, Nw])
+    r = bd.reshape(M[:,1,0] / M[:,0,0], [Nk, Nw])
 
     return t, r
