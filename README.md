@@ -12,7 +12,9 @@ Currently vtmm is implementing using a Tensor Flow backend. This means that grad
 
 ## Example
 
-```
+The primary function of `vtmm` is `tmm_rt(pol, omega, kx, n, d)`. A basic example is provided below.
+
+```python
 import tensorflow as tf
 from vtmm import tmm_rt
 
