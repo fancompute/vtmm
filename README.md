@@ -8,21 +8,48 @@ The `vtmm` package supports some of the same functionality as the [tmm](https://
 
 ## Gradients
 
-Currently `vtmm` is implementing using a Tensor Flow backend. This means that gradients of scalar loss / objective functions of the transmission and reflection can be taken for "free." At a later time a numpy backend will be implemented for users that do not need this functionality and do not want the tensorflow requirement.
+Currently `vtmm` uses Tensor Flow as its backend. This means that gradients of scalar loss / objective functions of the transmission and reflection can be taken for free. At a later time a numpy backend may be implemented for users that do not need gradient functionality and/or do not want Tensor Flow as a requirement.
 
 ## Example
 
-The primary function of `vtmm` is `tmm_rt(pol, omega, kx, n, d)`. A basic example is provided below.
+The entry point to `vtmm` is the function `tmm_rt(pol, omega, kx, n, d)`. See the example below for a basic illustration of how to use the package.
 
 ```python
 import tensorflow as tf
 from vtmm import tmm_rt
 
 pol = 's'
-n = tf.constant([1.0, 3.5, 1.0])
-d = tf.constant([2e-6])
-kx = tf.linspace(0.0, 2*np.pi*220e12/299792458, 1000)
-omega = tf.linspace(150e12, 220e12, 1000) * 2 * np.pi
+n = tf.constant([1.0, 3.5, 1.0]) # Layer refractive indices 
+d = tf.constant([2e-6]) # Layer thicknesses 
+kx = tf.linspace(0.0, 2*np.pi*220e12/299792458, 1000) # Parallel wavevectors
+omega = tf.linspace(150e12, 220e12, 1000) * 2 * np.pi # Angular frequencies
 
-t,r = tmm_rt(pol, omega, kx, n, d)
+# t and r will be 2D tensors of shape [ num kx, num omega ]
+t, r = tmm_rt(pol, omega, kx, n, d)
+```
+
+## Benchmarks
+
+See `tests/test_benchmark.py` for a comparison between `vtmm` and the non-vectorized `tmm` package. The benchmarks shown below are for `len(omega) == len(kx) == 50` and 75 timeit evaluations.
+
+```
+python -W ignore ./tests/test_benchmark.py
+```
+
+```
+Single omega / kx benchmark
+vtmm: 0.2432 s
+tmm:  0.0401 s
+
+Large stack benchmark
+vtmm: 0.7811 s
+tmm:  79.8765 s
+
+Medium stack benchmark
+vtmm: 0.4607 s
+tmm:  52.2255 s
+
+Small stack benchmark
+vtmm: 0.3367 s
+tmm:  41.0926 s
 ```
