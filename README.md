@@ -4,7 +4,9 @@
 
 ![](../master/img/spectrum_pcolor.png)
 
-The `vtmm` package supports some of the same functionality as the [tmm](https://github.com/sbyrnes321/tmm) Python package developed by Steven Byrnes. However, in `vtmm` all operations are vectorized over angles / wavevectors as well as frequencies. Due to the small size of the matrices involved in the transfer matrix method (2 x 2), such vectorization results in significant performance gains, especially for large structures and many frequencies / wavevectors. In some cases we have observed an order of magnitude difference in execution time between the two implementations. The much lower execution time in `vtmm` may be useful for applications which require many evaluations of the reflection and transmission coefficients, such as in fitting or optimization.
+The `vtmm` package supports some of the same functionality as the [tmm](https://github.com/sbyrnes321/tmm) Python package developed by Steven Byrnes. However, in `vtmm` all operations are vectorized over angles / wavevectors as well as frequencies. Due to the small size of the matrices involved in the transfer matrix method (2 x 2), such vectorization results in significant performance gains, especially for large structures and many frequencies / wavevectors. 
+
+In some cases we have observed approximately two orders of magnitude difference in execution time between the two implementations (see below). The much lower execution time in `vtmm` may be useful for applications which require many evaluations of the reflection and transmission coefficients, such as in fitting or optimization.
 
 ## Gradients
 
