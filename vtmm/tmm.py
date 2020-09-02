@@ -11,7 +11,7 @@ def tmm_rt(pol, omega, kx, n, d):
     kx    - 1D vector of incident wave vectors.
     n     - 1D vector of layer refractive indices (including first and last).
     d     - 1D vector of layer thicknesses (excluding first and last).
-    
+
     Returns:
     t , r - 2D tensors of shape [ num kx, num omega ]
     """
@@ -19,6 +19,11 @@ def tmm_rt(pol, omega, kx, n, d):
     Nk = len(kx)
     Nn = len(n)
     Nw = len(omega)
+
+    omega = omega.astype('complex128')
+    kx = kx.astype('complex128')
+    d = d.astype('complex128')
+    n = n.astype('complex128')
 
     assert Nd > 0
     assert Nd == Nn - 2
@@ -29,7 +34,7 @@ def tmm_rt(pol, omega, kx, n, d):
 
     k = n * omega / C0
     kz = tf.sqrt(tf.square(k) - tf.square(kx))
-    kzn = kz/k # Use normalized kz as a surrogate for cos()
+    kzn = kz / k # Use normalized kz as a surrogate for cos()
 
     kzn = tf.reshape(tf.transpose(kzn, perm=[1, 0, 2]), [Nn, -1]) # [Nn, Nk*Nw]
     kz = tf.reshape(tf.transpose(kz, perm=[1, 0, 2]), [Nn, -1]) # [Nn, Nk*Nw]
@@ -39,11 +44,11 @@ def tmm_rt(pol, omega, kx, n, d):
 
     # Flatten
     kz_d = tf.reshape(kz_d, [-1])
+    kz_d_conj = tf.math.conj(kz_d)
 
     # Make diags
-    zz = tf.constant(0.0, dtype=d.dtype)
-    diag_d = tf.stack([tf.math.exp(tf.complex(zz, -kz_d)),
-                       tf.math.exp(tf.complex(zz,  kz_d))], axis=1)
+    diag_d = tf.stack([tf.math.exp(-1j * kz_d),
+                       tf.math.exp( 1j * kz_d_conj)], axis=1)
 
     D = tf.linalg.diag(diag_d)
     D = tf.reshape(D, [Nd, Nk*Nw, 2, 2])
