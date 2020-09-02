@@ -1,6 +1,14 @@
+import numpy as np
 import tensorflow as tf
+
 from .const import C0
 from .fresnel import _r, _t
+
+def cast_complex(x):
+    if isinstance(x, np.ndarray):
+        return x.astype('complex128')
+    else:
+        return x
 
 def tmm_rt(pol, omega, kx, n, d):
     """Calculate the reflection and transmission amplitude for a multi-layer stack
@@ -19,10 +27,10 @@ def tmm_rt(pol, omega, kx, n, d):
     Nn = len(n)
     Nw = len(omega)
 
-    omega = omega.astype('complex128')
-    kx = kx.astype('complex128')
-    d = d.astype('complex128')
-    n = n.astype('complex128')
+    d = tf.cast(d, dtype=tf.complex128)
+    kx = tf.cast(kx, dtype=tf.complex128)
+    n = tf.cast(n, dtype=tf.complex128)
+    omega = tf.cast(omega, dtype=tf.complex128)
 
     assert Nd > 0
     assert Nd == Nn - 2

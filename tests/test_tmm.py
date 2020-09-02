@@ -37,7 +37,7 @@ def calc_rt_pytmm(pol, omega, kx, n, d):
 
     t = tf.constant(t)
     r = tf.constant(r)
-    
+
     return tf.constant(t), tf.constant(r)
 
 class TestTMM(unittest.TestCase):
@@ -84,6 +84,27 @@ class TestTMM(unittest.TestCase):
 
         self.assertLessEqual(np.linalg.norm(ts0.numpy()-ts1.numpy()), TOL)
         self.assertLessEqual(np.linalg.norm(rs0.numpy()-rs1.numpy()), TOL)
+
+    def test_complex_p(self):
+        vec_n = tf.constant([1.0 + 0j, 1.5 + 0.4j, 3.5 + 0j, 1.0 + 0j])
+        vec_d = tf.constant([1e-6, 1.33e-6])
+
+        tp0, rp0 = vtmm.tmm_rt('p', self.omega, self.kx,vec_n, vec_d)
+        tp1, rp1 = calc_rt_pytmm('p', self.omega, self.kx, vec_n, vec_d)
+
+        self.assertLessEqual(np.linalg.norm(tp0.numpy()-tp1.numpy()), TOL)
+        self.assertLessEqual(np.linalg.norm(rp0.numpy()-rp1.numpy()), TOL)
+
+    def test_complex_s(self):
+        vec_n = tf.constant([1.0 + 0j, 1.5 + 0.4j, 3.5 + 0j, 1.0 + 0j])
+        vec_d = tf.constant([1e-6, 1.33e-6])
+
+        ts0, rs0 = vtmm.tmm_rt('s', self.omega, self.kx, vec_n, vec_d)
+        ts1, rs1 = calc_rt_pytmm('s', self.omega, self.kx, vec_n, vec_d)
+
+        self.assertLessEqual(np.linalg.norm(ts0.numpy()-ts1.numpy()), TOL)
+        self.assertLessEqual(np.linalg.norm(rs0.numpy()-rs1.numpy()), TOL)
+
 
 if __name__ == '__main__':
     unittest.main()
