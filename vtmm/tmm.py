@@ -11,7 +11,6 @@ def tmm_rt(pol, omega, kx, n, d):
     kx    - 1D vector of incident wave vectors.
     n     - 1D vector of layer refractive indices (including first and last).
     d     - 1D vector of layer thicknesses (excluding first and last).
-
     Returns:
     t , r - 2D tensors of shape [ num kx, num omega ]
     """
